@@ -1,0 +1,82 @@
+import pandas as pd
+import json 
+(1) Process Match Result
+with open(r"C:\Users\ACER\OneDrive\Documents\t20_json_files\t20_json_files\t20_wc_match_results.json") as f:
+    data = json.load(f)
+data[0]['matchSummary']
+df_match = pd.DataFrame(data[0]['matchSummary'])
+df_match.head()
+df_match.shape
+df_match.rename({'scorecard' :'match_id'},axis=1,inplace =True)
+df_match.head()
+df_match.to_csv('D:\process match level.csv',index = False)
+
+Batting Summary
+with open(r"C:\Users\ACER\OneDrive\Documents\t20_json_files\t20_json_files\t20_wc_batting_summary.json") as f:
+    data = json.load(f)
+data
+with open(r"C:\Users\ACER\OneDrive\Documents\t20_json_files\t20_json_files\t20_wc_batting_summary.json") as f:
+    data = json.load(f)
+    all_records=[]
+    for rec in data:
+        all_records.extend(rec['battingSummary'])
+all_records
+
+df_batting=pd.DataFrame(all_records)
+df_batting.head()
+df_batting.shape
+df_batting.tail()
+df_batting["out/notout"]=df_batting.dismissal.apply(lambda x:"out"if len(x)>0 else "notout")
+df_batting.head()
+
+HERE WE DROP THE DISMISSIAL COLUMN 
+df_batting.drop(columns['dismissial'],inplace=True)
+df_batting['batsmanName'] =df_batting['batsmanName'].apply(lambda x:x.replace('â€',' '))
+df_batting['batsmanName'] =df_batting['batsmanName'].apply(lambda x:x.replace('\xa0',' '))
+df_batting.drop(columns=["match_id","mach_id","machid"],inplace=True)
+match_ids_dict={}
+for index, row in df_match.iterrows():
+    key1 = row["team1"] + ' Vs ' + row["team2"]
+    key2 = row['team2'] + ' Vs ' + row['team1']
+
+    match_ids_dict[key1] = row["match_id"]
+    match_ids_dict[key2] = row["match_id"]
+
+match_ids_dict
+
+df_batting["mach_id"]=df_batting["match"].map(match_ids_dict)
+df_batting.head()
+df_batting.drop(columns=["machid"],inplace=True)
+df_batting["mach_id"] = df_batting["match"].map(match_ids_dict)
+df_batting.head()
+# Assuming df_batting is your DataFrame
+# Replace 'file_path.csv' with the desired file path and name
+
+df_batting.to_csv('D:\data analysis cricket project.csv', index=False)
+
+df_batting.drop(columns=['dismissal'],inplace=True)
+
+(3)process bowling summary
+with open(r"C:\Users\ACER\OneDrive\Documents\t20_json_files\t20_json_files\t20_wc_bowling_summary.json")as f:
+    data=json.load(f)
+    all_records=[]
+    for rec in data:
+        all_records.extend(rec['bowlingSummary'])
+all_records[:2]
+
+df_bowling=pd.DataFrame(all_records)
+print(df_bowling.shape)
+df_bowling.head()
+with open(r"C:\Users\ACER\\Documents\t20_json_files\t20_json_files\t20_wc_player_info.json")as f:
+    data=json.load(f)
+df_bowling['match_id'] = df_bowling['match'].map(match_ids_dict)
+df_bowling.head()
+
+df_bowling['match_id']=df_bowling['match'].map(match_ids_dict)
+df_bowling.to_csv('D:\process bollingsummary.csv',index = False)
+
+df_players=pd.DataFrame(data)
+print(df_players.shape)
+df_players.head(10)
+
+
